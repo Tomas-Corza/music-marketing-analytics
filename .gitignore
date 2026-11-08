@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.py[cod]
+.DS_Store
+.env
+.env.*
+!.env.example
+data/*
+!data/.gitkeep
+outputs/*
+!outputs/.gitkeep
+exports/
+*.csv
+*.xlsx
+*.pdf
