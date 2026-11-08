@@ -1,67 +1,79 @@
 # Music Marketing Analytics
 
-**Python tools for Meta Ads reporting and music-marketing campaign analysis**  
+**Meta Ads and Spotify engagement analysis tools**  
 Prepared by Tomas Corza
 
-This repository documents a repeatable workflow for exporting, validating, and analyzing Meta Ads campaign data used in independent music marketing. It includes reusable code, setup instructions, and basic tests—not private client data.
+A client-neutral Python toolkit to export Meta Ads reports, analyze advertising efficiency, compare observed Spotify saves to advertising spend, and explore country performance in an interactive dashboard. The built-in dashboard example contains fictional data only.
 
-## What the scripts do
+## Interactive dashboard
 
-| Script | Purpose |
-|---|---|
-| `scripts/export_meta.py` | Download 10 Meta Insights report types: campaign, ad set and ad performance, geography, demographics, platform, placement, and monthly trends. |
-| `scripts/validate_exports.py` | Inventory CSV exports and report row/column counts or unreadable files. |
-| `scripts/analyze_meta.py` | Aggregate spend, impressions, link clicks and landing-page views; calculate cost per landing-page view and link CTR. |
-
-> **Source-history note:** This repository contains a cleaned, reproducible implementation of Meta export and campaign-analysis workflows. It is not a byte-for-byte archive of every original script. Review any additional locally saved scripts before describing the repository as a complete collection.
-
-## Quick start (macOS / Linux)
+Launch locally:
 
 ```bash
-cd music-marketing-analytics
+git pull origin main
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python -m streamlit run dashboard.py
+```
+
+Streamlit should open a local dashboard in your browser (normally http://localhost:8501).
+
+In the sidebar you can:
+- **Explore synthetic example:** see fictional advertising and Spotify statistics immediately.
+- **Upload your CSVs:** choose a Meta country export and a Spotify country summary covering the same date period, plus an optional modeled baseline.
+- Inspect overview metrics, compare countries, and download a country-level summary.
+
+### CSV format
+
+Meta CSV (example):
+```csv
+country,spend,actions,impressions,inline_link_clicks
+United States,100,"[{""action_type"":""landing_page_view"",""value"":""80""}]",8000,100
+Poland,50,"[{""action_type"":""landing_page_view"",""value"":""42""}]",4500,60
+```
+
+Spotify CSV (example):
+```csv
+country,saves,listeners
+United States,55,400
+Poland,31,250
+```
+
+Optionally include a separate modeled baseline CSV with `country,expected_saves`. Every country in the Meta CSV must also appear in Spotify (and vice versa); country spelling must match. Spotify file formats vary and may need column normalization. Only compare equivalent periods, countries, and definitions. A listeners total summed across days is not necessarily a unique listener count for the entire period.
+
+**Interpretation:** Observed saves / ad spend is not proof the ads generated those saves. Organic and playlist discovery can contribute to Spotify saves. An optional modeled baseline is an estimate, not a causal result.
+
+## Command-line scripts
+
+| File | Purpose |
+|---|---|
+| `scripts/export_meta.py` | Export up to 10 predefined Meta Insights reports with async reporting and pagination |
+| `scripts/validate_exports.py` | Inspect CSV exports for unreadable data and counts |
+| `scripts/analyze_meta.py` | Summarize ad spend, clicks, landing-page views, and efficiency |
+| `scripts/analyze_spotify.py` | Compare Spotify saves and listeners to ad spend by country, date, or track |
+| `scripts/dashboard_data.py` | Validate and combine country-level Meta and Spotify data |
+| `dashboard.py` | Streamlit dashboard with sample mode and CSV uploads |
+
+See [SPOTIFY_ANALYSIS.md](SPOTIFY_ANALYSIS.md) for the Spotify calculation methodology.
+
+## Setup
+
+```bash
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
-cp .env.example .env
-```
-
-Edit `.env` with a Meta Marketing API access token and ad account ID. **Never commit `.env`, tokens, or raw exports.** Meta Insights permissions and API field/breakdown support depend on account access and API version.
-
-Export a historical period:
-
-```bash
-python scripts/export_meta.py --start 2023-10-06 --end 2026-11-05
-```
-
-Check existing exports and generate a campaign summary:
-
-```bash
-python scripts/validate_exports.py --directory data
-python scripts/analyze_meta.py --input data/campaigns_overall.csv
-python scripts/analyze_meta.py --input data/campaigns_country.csv --group-by country --output outputs/by_country.csv
-python scripts/analyze_meta.py --input data/ads_placement.csv --group-by publisher_platform,platform_position --output outputs/by_placement.csv
-```
-
-Run tests:
-
-```bash
 python -m unittest discover -s tests -v
 ```
 
-## Metric definitions
+The dashboard's synthetic example requires no Meta token. For live Meta reporting, create a local `.env` from `.env.example`, add your own authorized API credentials, and run `python scripts/export_meta.py --help`.
 
-- **Landing-page views (LPVs):** Reported Meta `landing_page_view` actions, not Spotify streams or saves.
-- **Cost per LPV:** Spend / LPVs, blank when LPVs = 0.
-- **Link CTR:** Inline link clicks / impressions × 100.
-- **Zero LPVs:** Check destination, event tracking, objectives, and attribution settings before assuming an ad generated no real visits.
+## Privacy
 
-## Privacy and reuse
-
-Do not upload Meta tokens, unpublished client results, emails, audience lists, or personally identifying information. The `data/`, `outputs/`, and `exports/` directories are gitignored. If you publish case studies, use permissioned or anonymized figures. Campaign names may reveal unreleased projects; scrub them from example data.
+Do not publish tokens, client exports, unpublished campaign names, private Spotify data, audience lists, or personal information. The repository ignores `data/`, `outputs/`, and common CSV file types. Public hosting of a dashboard with real uploads may involve third-party processing; use only data you are authorized to upload.
 
 ## Limitations
 
-Meta Insights permissions and metric availability change over time; not every breakdown is supported for every account. Some requests may need async Insights jobs for very large date ranges. This starter currently uses paginated synchronous Insights requests, retries the initial request, and does not implement async job polling. Data exported with different attribution windows and objectives should not be compared as if directly equivalent.
+The dashboard is a **local CSV analysis tool**, not a live Meta/Spotify API dashboard. Automated tests validate calculation logic, not live API connectivity. Meta attribution windows, field support, and exports may vary. This repository is a reproducible, client-neutral implementation; it does not claim to contain every line of the original local research scripts.
 
 ## Author
 
