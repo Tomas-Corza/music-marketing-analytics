@@ -5,6 +5,12 @@ Prepared by Tomas Corza
 
 A client-neutral Python toolkit to export Meta Ads reports, analyze advertising efficiency, compare observed Spotify saves to advertising spend, and explore country performance in an interactive dashboard. The built-in dashboard example contains fictional data only.
 
+## Live music marketing dashboard
+
+**[Launch the interactive Music Marketing Analytics dashboard](https://music-marketing-analytics-tomas-corza.streamlit.app/)**
+
+This Streamlit app is for **music marketing analytics** (Meta Ads and Spotify engagement), not the separate e-commerce dashboard. The demonstration uses fictional data.
+
 ## Interactive dashboard
 
 Launch locally:
